@@ -11,17 +11,21 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { useState } from "react";
+import ThemeButton from "../ThemeButton";
+import { Button } from "../ui/button";
 
 export function Header() {
   const navItems = [
+
+    {
+        name: "Home",
+        link: "#home",
+      },
     {
       name: "Features",
       link: "#features",
     },
-    {
-      name: "Pricing",
-      link: "#pricing",
-    },
+    
     {
       name: "Contact",
       link: "#contact",
@@ -32,14 +36,14 @@ export function Header() {
 
   return (
     <div className="relative w-full">
-      <Navbar>
+      <Navbar >
         {/* Desktop Navigation */}
-        <NavBody>
+        <NavBody> 
           <NavbarLogo />
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
-            <NavbarButton variant="secondary">Login</NavbarButton>
-            <NavbarButton variant="primary">Book a call</NavbarButton>
+            <NavbarButton variant="primary">Connect Wallet</NavbarButton>
+            <ThemeButton />
           </div>
         </NavBody>
 
@@ -47,12 +51,15 @@ export function Header() {
         <MobileNav>
           <MobileNavHeader>
             <NavbarLogo />
+            <div className="flex items-center gap-3">
+            <ThemeButton/>
             <MobileNavToggle
               isOpen={isMobileMenuOpen}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             />
+            </div>
           </MobileNavHeader>
-
+        
           <MobileNavMenu
             isOpen={isMobileMenuOpen}
             onClose={() => setIsMobileMenuOpen(false)}
@@ -68,25 +75,20 @@ export function Header() {
               </a>
             ))}
             <div className="flex w-full flex-col gap-4">
+              
               <NavbarButton
                 onClick={() => setIsMobileMenuOpen(false)}
                 variant="primary"
                 className="w-full"
               >
-                Login
+                Connect Wallet
               </NavbarButton>
-              <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
-                className="w-full"
-              >
-                Book a call
-              </NavbarButton>
+              
             </div>
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
-      <DummyContent />
+      {/* <DummyContent /> */}
 
       {/* Navbar */}
     </div>

@@ -1,9 +1,41 @@
-import React from 'react'
+import { Button } from "../ui/button";
+import { HoverBorderGradient } from "../ui/hover-border-gradient";
 
-function Hero() {
+// components/landingPage/Hero.tsx
+export default function Hero() {
   return (
-    <div>Hero</div>
-  )
-}
+    <section className="relative w-full min-h-screen flex flex-col mt-20 items-center px-4 sm:px-6 lg:px-12 pt-28 pb-16">
+      {/* Hero Content */}
+      <div className="relative z-10 text-center dark:text-white max-w-4xl">
+        
+        {/* Announcement Tag */}
+        <div className="mb-6 flex justify-center">
+          <HoverBorderGradient
+            containerClassName="rounded-full"
+            as="button"
+            className="dark:bg-black bg-white text-black dark:text-white flex items-center space-x-2 px-4 py-2 text-sm sm:text-base"
+          >
+            <span>🎉 Introducing Drift – a LST Platform</span>
+          </HoverBorderGradient>
+        </div>
 
-export default Hero
+        {/* Heading */}
+        <h1 className="relative z-10 font-medium md:font-light text-[#17191c] dark:text-white text-3xl sm:text-4xl md:text-5xl lg:text-7xl leading-tight">
+          Drift into the Future of Staking
+        </h1>
+
+        {/* Subtext */}
+        <p className="mt-4 text-base sm:text-lg lg:text-xl text-gray-800 dark:text-gray-200 font-light max-w-2xl mx-auto">
+          Stake your SOL, earn rewards, and receive liquid tokens you can use across DeFi — all while your assets keep growing.
+        </p>
+
+        {/* Buttons */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <Button className="px-6 py-3 rounded-full text-base sm:text-lg bg-[#8174ff]">
+            Try For Free
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}

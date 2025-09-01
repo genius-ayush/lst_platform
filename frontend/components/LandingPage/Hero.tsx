@@ -1,11 +1,26 @@
+import Image from "next/image";
 import { Button } from "../ui/button";
 import { HoverBorderGradient } from "../ui/hover-border-gradient";
 
 // components/landingPage/Hero.tsx
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-screen flex flex-col mt-20 items-center px-4 sm:px-6 lg:px-12 pt-28 pb-16">
+    <section className="relative w-full md:min-h-screen flex flex-col md:mt-20 items-center px-4 sm:px-6 lg:px-12 pt-28 pb-16">
       {/* Hero Content */}
+      <div className="absolute inset-0 h-1/2 hidden md:block">
+        <Image
+          src="/herocircle.png"
+          width={5000}
+          height={5000}
+          alt="spiral background"
+          priority
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-100 
+           w-[1200px] md:w-[1600px] lg:w-[2000px] 
+           max-w-none pointer-events-none select-none 
+           opacity-30 dark:opacity-40"
+
+        />
+      </div>
       <div className="relative z-10 text-center dark:text-white max-w-4xl">
         
         {/* Announcement Tag */}

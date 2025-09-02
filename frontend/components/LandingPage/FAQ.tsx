@@ -55,7 +55,7 @@ export default function FAQ() {
   return (
     <section className="w-full max-w-3xl mx-auto py-20 px-4 text-center">
       {/* Heading */}
-      <h2 className="text-3xl font-semibold tracking-tight dark:text-white">
+      <h2 className="text-3xl font-medium tracking-tight dark:text-white">
         Frequently Asked Questions
       </h2>
       <p className="mt-2 text-gray-400">

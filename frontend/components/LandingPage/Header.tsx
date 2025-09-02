@@ -12,9 +12,11 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { useState } from "react";
 import ThemeButton from "../ThemeButton";
-import { Button } from "../ui/button";
+import { useRouter } from 'next/navigation'
 
 export function Header() {
+
+  const router = useRouter() ; 
   const navItems = [
 
     {
@@ -42,7 +44,7 @@ export function Header() {
           <NavbarLogo />
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
-            <NavbarButton variant="primary">Connect Wallet</NavbarButton>
+            <NavbarButton variant="primary" className=" text-white bg-[#8174ff] rounded-xl" onClick={()=>router.push('/stacknow')}>Stack Now</NavbarButton>
             <ThemeButton />
           </div>
         </NavBody>

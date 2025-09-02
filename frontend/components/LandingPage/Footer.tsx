@@ -6,7 +6,7 @@ import { TextHoverEffect } from "../ui/text-hover-effect";
 
 export default function Footer() {
   return (
-    <footer className="w-full  dark:border-gray-800 py-10 px-6 lg:px-12 bg-white dark:bg-[#17191c]">
+    <footer className="w-full  dark:border-gray-800 py-10 px-6 lg:px-12 bg-white dark:bg-[#17191c]" id="contact">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between gap-10 mb-2 pb-5 border-b-2 ">
 
         {/* Left Section */}

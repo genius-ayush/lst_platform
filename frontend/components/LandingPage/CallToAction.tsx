@@ -3,8 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 
 function CallToAction() {
+  const router = useRouter()
   return (
     <section className="bg-backgrond py-20 text-center flex flex-col items-center">
       
@@ -18,7 +20,7 @@ function CallToAction() {
       </div>
 
       {/* Heading */}
-      <h2 className="text-3xl font-semibold dark:text-white max-w-2xl">
+      <h2 className="text-3xl font-lg dark:text-white max-w-2xl">
         Unlock more with your staked SOL through Drift
       </h2>
 
@@ -29,7 +31,7 @@ function CallToAction() {
 
       {/* Button */}
       <div className="mt-8">
-      <Button className="px-6 py-3 rounded-full text-base sm:text-lg bg-[#8174ff]">
+      <Button className="px-6 py-3 rounded-full text-base sm:text-lg bg-[#8174ff]" onClick={()=>router.push("/stacknow")}>
             Start Stacking
           </Button>
       </div>

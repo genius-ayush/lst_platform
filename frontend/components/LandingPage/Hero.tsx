@@ -1,11 +1,12 @@
+'use-client'
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { HoverBorderGradient } from "../ui/hover-border-gradient";
-
-// components/landingPage/Hero.tsx
+import {useRouter} from 'next/navigation' ; 
 export default function Hero() {
+  const router =   useRouter() ; 
   return (
-    <section className="relative w-full md:min-h-screen flex flex-col md:mt-20 items-center px-4 sm:px-6 lg:px-12 pt-28 pb-16">
+    <section className="relative w-full md:min-h-screen flex flex-col md:mt-20 items-center px-4 sm:px-6 lg:px-12 pt-28 pb-16" id="home">
       {/* Hero Content */}
       <div className="absolute inset-0 h-1/2 hidden md:block">
         <Image
@@ -46,8 +47,8 @@ export default function Hero() {
 
         {/* Buttons */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Button className="px-6 py-3 rounded-full text-base sm:text-lg bg-[#8174ff]">
-            Try For Free
+          <Button className="px-6 py-3 rounded-full text-base sm:text-lg bg-[#8174ff]" onClick={()=>router.push('/stacknow')}>
+            Stack Now
           </Button>
         </div>
       </div>

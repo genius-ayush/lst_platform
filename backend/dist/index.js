@@ -73,9 +73,9 @@ app.post("/transaction", (req, res) => __awaiter(void 0, void 0, void 0, functio
     catch (err) {
         console.error(err);
         //@ts-ignore
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: err.message, "message": "this is error from catch" });
     }
 }));
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+app.listen(5000, () => {
+    console.log("Server running on http://localhost:5000");
 });

@@ -36,7 +36,7 @@ const tokenProgramId =  TOKEN_2022_PROGRAM_ID
 app.post("/transaction", async (req, res) => {
   try {
     const txData = req.body[0]; // Assuming array like in your example
-
+    
     // Extract fields
     const sender = txData.nativeTransfers[0].fromUserAccount;
     const receiver = txData.nativeTransfers[0].toUserAccount;
@@ -91,11 +91,13 @@ app.post("/transaction", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+
+    
     //@ts-ignore
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message , "message" :"this is error from catch" });
   }
 });
 
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+app.listen(5000, () => {
+  console.log("Server running on http://localhost:5000");
 });

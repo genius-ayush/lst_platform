@@ -13,15 +13,15 @@ import { useWallet } from "@solana/wallet-adapter-react"
 
 type Token = "SOL" | "driftSOL"
 
-export function StakeForm() {
+export function Unstackform() {
   const {connected} = useWallet() ; 
-  const [fromToken, setFromToken] = React.useState<Token>("SOL")
+  const [fromToken, setFromToken] = React.useState<Token>("driftSOL")
   const [amount, setAmount] = React.useState<string>("")
   const [method, setMethod] = React.useState<"direct" | "jupiter">("direct")
 
   // Simple mock conversion rate and fee to show interactivity
   const parsed = Number.parseFloat(amount || "0") || 0
-  const rate = 0.998  // pretend mint fee or redemption
+  const rate = 1.2 // pretend mint fee or redemption
   const receive = parsed * rate
 
   return (
@@ -29,7 +29,7 @@ export function StakeForm() {
   <header className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
     <div>
       <h1 className="text-pretty text-3xl font-semibold tracking-tight md:text-5xl">
-        Get driftSol
+        Unstack
       </h1>
     </div>
     <aside className="text-left md:text-right">
@@ -39,15 +39,15 @@ export function StakeForm() {
   </header>
 
   {/* Cards section */}
-  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 items-center">
+  <div className=" grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 items-center">
     {/* From Card */}
     <Card className="bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/60 border border-border/60 rounded-[var(--radius)] p-5 w-full">
-      <p className="text-2xl font-light mb-4">{"You're staking"}</p>
+      <p className="text-2xl font-light mb-4">{"You're Unstacking"}</p>
       <div className="flex items-center justify-between gap-4">
         <TokenSelect
           value={fromToken}
           onValueChange={(v) => setFromToken(v as Token)}
-          tokens={["SOL"]}
+          tokens={["driftSOL"]}
         />
         <Input
           inputMode="decimal"
@@ -65,13 +65,12 @@ export function StakeForm() {
       <ArrowRight />
     </div>
 
-    {/* To Card */}
     <Card className="bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/60 border border-border/60 rounded-[var(--radius)] p-5 w-full">
       <p className="text-2xl font-light mb-4">{"To receive"}</p>
       <div className="flex items-center justify-between gap-4">
         <div className="flex gap-2 items-center">
           <img src={`/Solana_logo.png`} alt="" className="h-10 w-10 rounded-full" />
-          <span className="font-bold">driftSOL</span>
+          <span className="font-bold">SOL</span>
         </div>
         <Input
           inputMode="decimal"
@@ -83,27 +82,28 @@ export function StakeForm() {
         />
       </div>
     </Card>
+    
   </div>
 
   {/* Controls below */}
   <div className="mt-10">
     <div className="mb-5 grid grid-cols-1 md:grid-cols-2 gap-3">
       <SegmentedButton
-        label="Direct Mint"
+        label="Immediately via Jupiter"
         active={method === "direct"}
         onClick={() => setMethod("direct")}
-        description="Mint via Stake Pool contract"
+        description="0.08% below Fair Value"
       />
       <SegmentedButton
-        label="via Jupiter"
+        label="Delayed in 1 day"
         active={method === "jupiter"}
         onClick={() => setMethod("jupiter")}
-        description="Swap for JitoSOL via Jupiter"
+        description="0.1% Unstake Fee"
       />
     </div>
 
     {connected ?  (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95">
-      Convert to driftSOL
+      Unstack SOL
     </Button>) : (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95">
       Connect Wallet
     </Button>)}
@@ -196,6 +196,8 @@ function SegmentedButton({
           {description}
         </div>
       ) : null}
+
+      
     </button>
   )
 }

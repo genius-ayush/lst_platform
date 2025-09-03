@@ -5,6 +5,7 @@ import React from 'react'
 import { Button } from '../ui/button'
 import ThemeButton from '../ThemeButton'
 import { useRouter } from 'next/navigation'
+import { WalletButton } from './ConnectWallet'
 function Header() {
   const router = useRouter() ; 
   return (
@@ -18,7 +19,7 @@ function Header() {
             <div className="flex space-x-4">
               
                 <ThemeButton/>
-                <Button>CONNECT WALLET</Button>
+                <WalletButton/>
             </div>
           </nav>
         </div>

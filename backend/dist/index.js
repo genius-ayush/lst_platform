@@ -62,7 +62,7 @@ app.post("/transaction", (req, res) => __awaiter(void 0, void 0, void 0, functio
         // Mint tokens
         const sig = yield (0, spl_token_1.mintTo)(connection, authority, LST_MINT, senderTokenAccount.address, authority, Math.floor(lstAmount * 1e9), // LST decimals (assuming 9)
         [], { commitment: "confirmed" }, tokenProgramId);
-        res.json({
+        return res.json({
             message: "LST minted successfully",
             sender,
             solDeposited: solAmount,
@@ -73,7 +73,65 @@ app.post("/transaction", (req, res) => __awaiter(void 0, void 0, void 0, functio
     catch (err) {
         console.error(err);
         //@ts-ignore
-        res.status(500).json({ error: err.message, "message": "this is error from catch" });
+        return res.status(500).json({ error: err.message, "message": "this is error from catch" });
+    }
+}));
+app.post("/txn", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const txn = req.body[0];
+        const description = txn.description;
+        const values = description.split(" ");
+        const from = values[0];
+        const to = values[5];
+        const amount = values[2];
+        const unit = values[3];
+        const event = values[1];
+        if (event !== 'transferred') {
+            return res.status(400).json({ message: "it is not transfered event" });
+        }
+        if (unit == 'SOL') {
+            //stack the sol to drift sol ;
+            if (to !== VAULT_ADDRESS + ".") {
+                return res.status(400).json({ error: "not send to our vault" });
+            }
+            const lstAmount = amount * 0.8;
+            const fromPubicKey = new web3_js_1.PublicKey(from);
+            const fromTokenAccount = yield (0, spl_token_1.getOrCreateAssociatedTokenAccount)(connection, authority, LST_MINT, fromPubicKey, false, 'confirmed', undefined, tokenProgramId);
+            console.log("ata address", fromTokenAccount);
+            const sig = yield (0, spl_token_1.mintTo)(connection, authority, LST_MINT, fromTokenAccount.address, authority, Math.floor(lstAmount * 1e9), [], { commitment: "confirmed" }, tokenProgramId);
+            return res.json({
+                message: "driftSol mint successfully",
+                from,
+                solDeposited: amount,
+                lstMinted: lstAmount,
+                sig
+            });
+        }
+        else if (unit == '6AmxLvScpqqgCfdQQ92Cc1gLxKbPzeyCsc5sztCp2HGU') {
+            //unstack the driftsol to sol ; 
+            if (to !== VAULT_ADDRESS + ".") {
+                return res.status(400).json({ error: "not send to our vault" });
+            }
+            console.log("after vault address");
+            const sendAmount = amount * 1.25;
+            const transferTxn = new web3_js_1.Transaction().add(web3_js_1.SystemProgram.transfer({
+                fromPubkey: authority.publicKey,
+                toPubkey: new web3_js_1.PublicKey(from),
+                lamports: Math.floor(sendAmount * 1e9)
+            }));
+            console.log("after txn");
+            console.log(authority);
+            const signature = yield (0, web3_js_1.sendAndConfirmTransaction)(connection, transferTxn, [authority]);
+            console.log("after signature");
+            return res.status(200).json({ signature });
+        }
+        else {
+            return res.status(400).json({ message: "wrong token transferred" });
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
     }
 }));
 app.listen(5000, () => {

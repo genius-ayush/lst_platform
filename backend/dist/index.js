@@ -30,52 +30,61 @@ const VAULT_ADDRESS = process.env.YOUR_VAULT_ADDRESS;
 // Backend authority keypair (this account can mint your LST tokens)
 const secret = bs58.decode(process.env.secret);
 const authority = web3_js_1.Keypair.fromSecretKey(secret);
-console.log("authority", authority);
 // Select correct token program (classic vs Token-2022)
 const tokenProgramId = spl_token_1.TOKEN_2022_PROGRAM_ID;
-app.post("/transaction", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const txData = req.body[0]; // Assuming array like in your example
-        // Extract fields
-        const sender = txData.nativeTransfers[0].fromUserAccount;
-        const receiver = txData.nativeTransfers[0].toUserAccount;
-        const amountLamports = txData.nativeTransfers[0].amount;
-        console.log("sender", sender);
-        console.log("receiver", receiver);
-        if (receiver !== VAULT_ADDRESS) {
-            return res.status(400).json({ error: "Not sent to our vault" });
-        }
-        const solAmount = amountLamports / 1000000000; // lamports → SOL
-        const lstAmount = solAmount * 0.8; // Exchange rate
-        // Mint LST to sender
-        const senderPubkey = new web3_js_1.PublicKey(sender);
-        // Get or create ATA (Associated Token Account) for sender
-        const senderTokenAccount = yield (0, spl_token_1.getOrCreateAssociatedTokenAccount)(connection, authority, // payer
-        LST_MINT, // mint
-        senderPubkey, // owner
-        false, // allowOwnerOffCurve
-        "confirmed", // commitment
-        undefined, // includeAncillaryAccounts
-        tokenProgramId // token program id (classic or 2022)
-        );
-        console.log("senderTokenAccount", senderTokenAccount);
-        // Mint tokens
-        const sig = yield (0, spl_token_1.mintTo)(connection, authority, LST_MINT, senderTokenAccount.address, authority, Math.floor(lstAmount * 1e9), // LST decimals (assuming 9)
-        [], { commitment: "confirmed" }, tokenProgramId);
-        return res.json({
-            message: "LST minted successfully",
-            sender,
-            solDeposited: solAmount,
-            lstMinted: lstAmount,
-            signature: sig,
-        });
-    }
-    catch (err) {
-        console.error(err);
-        //@ts-ignore
-        return res.status(500).json({ error: err.message, "message": "this is error from catch" });
-    }
-}));
+// app.post("/transaction", async (req, res) => {
+//   try {
+//     const txData = req.body[0]; // Assuming array like in your example
+//     // Extract fields
+//     const sender = txData.nativeTransfers[0].fromUserAccount;
+//     const receiver = txData.nativeTransfers[0].toUserAccount;
+//     const amountLamports = txData.nativeTransfers[0].amount;
+//     console.log("sender", sender);
+//     console.log("receiver", receiver);
+//     if (receiver !== VAULT_ADDRESS) {
+//       return res.status(400).json({ error: "Not sent to our vault" });
+//     }
+//     const solAmount = amountLamports / 1_000_000_000; // lamports → SOL
+//     const lstAmount = solAmount * 0.8; // Exchange rate
+//     // Mint LST to sender
+//     const senderPubkey = new PublicKey(sender);
+//     // Get or create ATA (Associated Token Account) for sender
+//     const senderTokenAccount = await getOrCreateAssociatedTokenAccount(
+//       connection,
+//       authority,          // payer
+//       LST_MINT,           // mint
+//       senderPubkey,       // owner
+//       false,              // allowOwnerOffCurve
+//       "confirmed",        // commitment
+//       undefined,          // includeAncillaryAccounts
+//       tokenProgramId      // token program id (classic or 2022)
+//     );
+//     console.log("senderTokenAccount", senderTokenAccount);
+//     // Mint tokens
+//     const sig = await mintTo(
+//       connection,
+//       authority,
+//       LST_MINT,
+//       senderTokenAccount.address,
+//       authority,
+//       Math.floor(lstAmount * 1e9), // LST decimals (assuming 9)
+//       [],
+//       { commitment: "confirmed" },
+//       tokenProgramId
+//     );
+//     return res.json({
+//       message: "LST minted successfully",
+//       sender,
+//       solDeposited: solAmount,
+//       lstMinted: lstAmount,
+//       signature: sig,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     //@ts-ignore
+//     return res.status(500).json({ error: err.message, "message": "this is error from catch" });
+//   }
+// });
 app.post("/txn", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const txn = req.body[0];

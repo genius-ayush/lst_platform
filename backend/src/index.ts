@@ -204,6 +204,10 @@ app.post("/txn", async (req, res) => {
 
 })
 
+app.get('/' , (req , res)=>{
+  res.send("hello world") ; 
+})
+
 app.listen(5000, () => {
   console.log("Server running on http://localhost:5000");
 });

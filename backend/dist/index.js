@@ -143,6 +143,9 @@ app.post("/txn", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ error: err.message });
     }
 }));
+app.get('/', (req, res) => {
+    res.send("hello world");
+});
 app.listen(5000, () => {
     console.log("Server running on http://localhost:5000");
 });

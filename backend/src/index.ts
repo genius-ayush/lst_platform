@@ -118,7 +118,7 @@ app.post("/txn", async (req, res) => {
     const event = values[1];
 
     if(event !== 'transferred'){
-      return res.status(400).json({message: `it is not transfered event ${event} transactionbody looks like : ${req.body}`})
+      return res.status(400).json({message: `it is not transfered event ${event} `})
     }
 
     if(unit == 'SOL'){

@@ -7,9 +7,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
-import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js"
+import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js"
 
-
+const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL!)
 console.log("vault address" , process.env.NEXT_PUBLIC_VAULT_ADDRESS) ;
 
 type Token = "SOL" | "driftSOL"
@@ -22,7 +22,7 @@ export function StakeForm() {
   const wallet = useWallet() ; 
   const[loading , setLoading] = React.useState(false) ; 
   const[message , setMessage] = React.useState("") ; 
-  const {connection} = useConnection();
+  // const {connection} = useConnection();
 
   // Simple mock conversion rate and fee to show interactivity
   const parsed = Number.parseFloat(amount || "0") || 0
@@ -46,11 +46,16 @@ export function StakeForm() {
         SystemProgram.transfer({
           fromPubkey : wallet.publicKey , 
           toPubkey : new PublicKey(process.env.NEXT_PUBLIC_VAULT_ADDRESS!) , 
-          lamports : parseInt(amount) * LAMPORTS_PER_SOL  ,
+          lamports :  Math.floor(parseFloat(amount) * LAMPORTS_PER_SOL)
+          ,
         })
       )
+      const {blockhash} = await connection.getLatestBlockhash() ;
+      transaction.recentBlockhash = blockhash ; 
+      transaction.feePayer = new PublicKey(wallet.publicKey)
 
-      await wallet.sendTransaction(transaction , connection) ; 
+
+      await wallet.sendTransaction(transaction , connection ) ; 
 
       setMessage("✅Txn successfull") ; 
       setLoading(false) ; 

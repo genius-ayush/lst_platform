@@ -97,7 +97,7 @@ app.post("/txn", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const unit = values[3];
         const event = values[1];
         if (event !== 'transferred') {
-            return res.status(400).json({ message: `it is not transfered event ${event} transactionbody looks like : ${req.body}` });
+            return res.status(400).json({ message: `it is not transfered event ${event} ` });
         }
         if (unit == 'SOL') {
             //stack the sol to drift sol ;

@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { useWallet } from "@solana/wallet-adapter-react"
+import { useConnection, useWallet } from "@solana/wallet-adapter-react"
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js"
 
 
-
+console.log("vault address" , process.env.NEXT_PUBLIC_VAULT_ADDRESS) ;
 
 type Token = "SOL" | "driftSOL"
 
@@ -18,13 +19,53 @@ export function StakeForm() {
   const [fromToken, setFromToken] = React.useState<Token>("SOL")
   const [amount, setAmount] = React.useState<string>("")
   const [method, setMethod] = React.useState<"direct" | "jupiter">("direct")
+  const wallet = useWallet() ; 
+  const[loading , setLoading] = React.useState(false) ; 
+  const[message , setMessage] = React.useState("") ; 
+  const {connection} = useConnection();
 
   // Simple mock conversion rate and fee to show interactivity
   const parsed = Number.parseFloat(amount || "0") || 0
-  const rate = 0.998  // pretend mint fee or redemption
+  const rate = 0.8  // pretend mint fee or redemption
   const receive = parsed * rate
 
+
+  const txn = async()=>{
+    
+    if(!wallet.publicKey){
+      throw new Error("Wallet not connected") ; 
+    }
+    
+    try{
+
+      setLoading(true) ; 
+
+      setMessage("Processing Txn...") ;
+      
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey : wallet.publicKey , 
+          toPubkey : new PublicKey(process.env.NEXT_PUBLIC_VAULT_ADDRESS!) , 
+          lamports : parseInt(amount) * LAMPORTS_PER_SOL  ,
+        })
+      )
+
+      await wallet.sendTransaction(transaction , connection) ; 
+
+      setMessage("✅Txn successfull") ; 
+      setLoading(false) ; 
+
+
+    }catch(err){
+      console.error(err) ; 
+      setMessage("❌ Transaction failed. Try again.")
+      setLoading(false) ; 
+      
+    }
+  }
+
   return (
+
     <div className="flex flex-col">
   <header className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
     <div>
@@ -34,7 +75,7 @@ export function StakeForm() {
     </div>
     <aside className="text-left md:text-right">
       <p className="text-sm text-muted-foreground">APY</p>
-      <p className="text-4xl font-bold text-primary md:text-5xl">6.73%</p>
+      <p className="text-4xl font-bold text-primary md:text-5xl">7%</p>
     </aside>
   </header>
 
@@ -102,11 +143,16 @@ export function StakeForm() {
       />
     </div>
 
-    {connected ?  (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95">
-      Convert to driftSOL
+    {connected ?  (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95" onClick={txn}>
+      
+      {loading ? "Processing..." : "Convert to driftSol"}
     </Button>) : (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95">
       Connect Wallet
     </Button>)}
+
+    {message && (
+                        <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">{message}</p>
+                    )}
 
     {/* Fine Controls */}
     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

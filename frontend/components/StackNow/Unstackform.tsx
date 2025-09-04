@@ -34,7 +34,7 @@ export function Unstackform() {
     </div>
     <aside className="text-left md:text-right">
       <p className="text-sm text-muted-foreground">APY</p>
-      <p className="text-4xl font-bold text-primary md:text-5xl">6.73%</p>
+      <p className="text-4xl font-bold text-primary md:text-5xl">7%</p>
     </aside>
   </header>
 

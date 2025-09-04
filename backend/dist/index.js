@@ -87,6 +87,7 @@ const tokenProgramId = spl_token_1.TOKEN_2022_PROGRAM_ID;
 // });
 app.post("/txn", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log(req.body);
         const txn = req.body[0];
         const description = txn.description;
         const values = description.split(" ");

@@ -101,6 +101,7 @@ app.post("/txn", async (req, res) => {
 
   try {
 
+    console.log(req.body) ; 
     const txn = req.body[0];
 
     const description = txn.description;

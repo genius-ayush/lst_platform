@@ -96,9 +96,9 @@ app.post("/txn", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const amount = values[2];
         const unit = values[3];
         const event = values[1];
-        // if(event !== 'transferred'){
-        //   return res.status(400).json({message: "it is not transfered event"})
-        // }
+        if (event !== 'transferred') {
+            return res.status(400).json({ message: `it is not transfered event ${event}` });
+        }
         if (unit == 'SOL') {
             //stack the sol to drift sol ;
             if (to !== VAULT_ADDRESS + ".") {
@@ -136,7 +136,7 @@ app.post("/txn", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(200).json({ signature });
         }
         else {
-            return res.status(400).json({ message: "wrong token transferred" });
+            return res.status(400).json({ message: `wrong token transferred ${unit}` });
         }
     }
     catch (err) {

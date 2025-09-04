@@ -117,9 +117,9 @@ app.post("/txn", async (req, res) => {
 
     const event = values[1];
 
-    // if(event !== 'transferred'){
-    //   return res.status(400).json({message: "it is not transfered event"})
-    // }
+    if(event !== 'transferred'){
+      return res.status(400).json({message: `it is not transfered event ${event}`})
+    }
 
     if(unit == 'SOL'){
       //stack the sol to drift sol ;
@@ -191,7 +191,7 @@ app.post("/txn", async (req, res) => {
       return res.status(200).json({ signature }); 
 
     }else{
-      return res.status(400).json({message : "wrong token transferred"}) ; 
+      return res.status(400).json({message : `wrong token transferred ${unit}`}) ; 
     }
 
   } catch (err: any) {

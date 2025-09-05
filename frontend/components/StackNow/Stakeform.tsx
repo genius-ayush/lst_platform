@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js"
-
-const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL!)
+import { toast } from "sonner"
+const  connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL!)
 console.log("vault address" , process.env.NEXT_PUBLIC_VAULT_ADDRESS) ;
 
 type Token = "SOL" | "driftSOL"
@@ -32,14 +32,18 @@ export function StakeForm() {
 
   const txn = async () => {
     if (!wallet.publicKey) {
-      setMessage("❌ Wallet not connected.");
+      const errorMsg = "❌ Wallet not connected.";
+      setMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
   
     // Validate input
     const uiAmount = Number.parseFloat(amount || "0");
     if (!Number.isFinite(uiAmount) || uiAmount <= 0) {
-      setMessage("❌ Enter a valid amount of SOL.");
+      const errorMsg = "❌ Enter a valid amount of SOL.";
+      setMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
   
@@ -48,14 +52,17 @@ export function StakeForm() {
     try {
       vaultPk = new PublicKey(process.env.NEXT_PUBLIC_VAULT_ADDRESS!);
     } catch (e) {
-      setMessage("❌ Invalid vault address in env file.");
+      const errorMsg = "❌ Invalid vault address in env file.";
+      setMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
   
     try {
       setLoading(true);
-      setMessage("Processing Txn...");
-  
+      const processingMsg = "Processing Txn...";
+      setMessage(processingMsg);
+      toast.message(processingMsg);
       const lamports = Math.floor(uiAmount * LAMPORTS_PER_SOL);
   
       // Build transfer transaction
@@ -74,16 +81,21 @@ export function StakeForm() {
   
       // Send transaction
       const sig = await wallet.sendTransaction(transaction, connection);
-  
-      setMessage(`✅ Txn successful: ${sig}`);
+      
+      const successMsg = `✅ Txn successful: ${sig}`;
+      setMessage(successMsg);
+      toast.success(successMsg);
     } catch (err: any) {
       console.error("Transaction error:", err);
       const lower = err?.message?.toLowerCase?.() || "";
+      let errorMsg: string;
       if (lower.includes("rejected")) {
-        setMessage("❌ You rejected the transaction.");
+        errorMsg = "❌ You rejected the transaction.";
       } else {
-        setMessage("❌ Transaction failed. Check console for details.");
+        errorMsg = "❌ Transaction failed. Check console for details.";
       }
+      setMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -176,9 +188,12 @@ export function StakeForm() {
       Connect Wallet
     </Button>)}
 
-    {message && (
+    
+
+
+    {/* {message && (
                         <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">{message}</p>
-                    )}
+                    )} */}
 
     {/* Fine Controls */}
     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

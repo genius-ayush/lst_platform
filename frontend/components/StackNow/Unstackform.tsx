@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { Connection, PublicKey, Transaction } from "@solana/web3.js"
 import { createTransferCheckedInstruction, createTransferInstruction, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+import { toast } from "sonner"
 
 const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL!)
 
@@ -39,14 +40,18 @@ export function Unstackform() {
 
   const unstack_sol = async () => {
     if (!wallet.publicKey) {
-      setMessage("Connect your wallet to continue.");
+      const errorMsg = "❌ Connect your wallet to continue.";
+      setMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
   
     // Parse amount input
     const uiAmount = Number.parseFloat(amount || "0");
     if (!Number.isFinite(uiAmount) || uiAmount <= 0) {
-      setMessage("Enter a valid amount greater than 0.");
+      const errorMsg = "❌ Enter a valid amount greater than 0.";
+      setMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
   
@@ -56,7 +61,7 @@ export function Unstackform() {
     try {
       driftMintPk = new PublicKey(DRIFT_MINT_ADDRESS);
   
-      // 🚀 FIX: derive the vault’s ATA instead of hardcoding the mint address
+      // 🚀 FIX: derive the vault's ATA instead of hardcoding the mint address
       const vaultAuthority = new PublicKey(process.env.NEXT_PUBLIC_VAULT_ADDRESS!); // your backend-controlled wallet
       vaultAtaPk = await getAssociatedTokenAddress(
         driftMintPk,
@@ -68,15 +73,19 @@ export function Unstackform() {
       console.log(vaultAtaPk.toBase58());
     } catch (e) {
       console.error(e);
-      setMessage("Config error: Invalid mint or vault authority public key.");
+      const errorMsg = "❌ Config error: Invalid mint or vault authority public key.";
+      setMessage(errorMsg);
+      toast.error(errorMsg);
       return;
     }
   
     try {
       setLoading(true);
-      setMessage("Processing transaction...");
+      const processingMsg = "Processing transaction...";
+      setMessage(processingMsg);
+      toast.message(processingMsg);
   
-      // Derive the user’s ATA for driftSOL
+      // Derive the user's ATA for driftSOL
       const userDriftAta = await getAssociatedTokenAddress(
         driftMintPk,
         wallet.publicKey,
@@ -90,7 +99,9 @@ export function Unstackform() {
         const available = BigInt(bal.value.amount);
         const toSend = BigInt(Math.round(uiAmount * 10 ** DRIFT_DECIMALS));
         if (available < toSend) {
-          setMessage("Insufficient driftSOL balance.");
+          const errorMsg = "❌ Insufficient driftSOL balance.";
+          setMessage(errorMsg);
+          toast.error(errorMsg);
           setLoading(false);
           return;
         }
@@ -123,19 +134,24 @@ export function Unstackform() {
   
       // Send transaction
       const sig = await wallet.sendTransaction(transaction, connection);
-      setMessage(`✅ Txn successful: ${sig}`);
+      const successMsg = `✅ Txn successful: ${sig}`;
+      setMessage(successMsg);
+      toast.success(successMsg);
     } catch (err: any) {
       console.error(err);
       const lower = err?.message?.toLowerCase?.() || "";
+      let errorMsg: string;
       if (lower.includes("rejected")) {
-        setMessage("You rejected the transaction request.");
+        errorMsg = "❌ You rejected the transaction request.";
       } else if (lower.includes("owner") || lower.includes("mint")) {
-        setMessage("Token account mismatch. Ensure vault ATA matches driftSOL mint & Token-2022.");
+        errorMsg = "❌ Token account mismatch. Ensure vault ATA matches driftSOL mint & Token-2022.";
       } else if (lower.includes("not initialized")) {
-        setMessage("Vault ATA not initialized. Create the ATA for your vault first.");
+        errorMsg = "❌ Vault ATA not initialized. Create the ATA for your vault first.";
       } else {
-        setMessage("❌ Transaction failed. Check console for details.");
+        errorMsg = "❌ Transaction failed. Check console for details.";
       }
+      setMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -227,9 +243,9 @@ export function Unstackform() {
 Connect Wallet
 </Button>)}
 
-{message && (
+{/* {message && (
 <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">{message}</p>
-)}
+)} */}
 
     {/* Fine Controls */}
     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

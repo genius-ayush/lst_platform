@@ -30,44 +30,65 @@ export function StakeForm() {
   const receive = parsed * rate
 
 
-  const txn = async()=>{
-    
-    if(!wallet.publicKey){
-      throw new Error("Wallet not connected") ; 
+  const txn = async () => {
+    if (!wallet.publicKey) {
+      setMessage("❌ Wallet not connected.");
+      return;
     }
-    
-    try{
-
-      setLoading(true) ; 
-
-      setMessage("Processing Txn...") ;
-      
+  
+    // Validate input
+    const uiAmount = Number.parseFloat(amount || "0");
+    if (!Number.isFinite(uiAmount) || uiAmount <= 0) {
+      setMessage("❌ Enter a valid amount of SOL.");
+      return;
+    }
+  
+    // Validate vault address
+    let vaultPk: PublicKey;
+    try {
+      vaultPk = new PublicKey(process.env.NEXT_PUBLIC_VAULT_ADDRESS!);
+    } catch (e) {
+      setMessage("❌ Invalid vault address in env file.");
+      return;
+    }
+  
+    try {
+      setLoading(true);
+      setMessage("Processing Txn...");
+  
+      const lamports = Math.floor(uiAmount * LAMPORTS_PER_SOL);
+  
+      // Build transfer transaction
       const transaction = new Transaction().add(
         SystemProgram.transfer({
-          fromPubkey : wallet.publicKey , 
-          toPubkey : new PublicKey(process.env.NEXT_PUBLIC_VAULT_ADDRESS!) , 
-          lamports :  Math.floor(parseFloat(amount) * LAMPORTS_PER_SOL)
-          ,
+          fromPubkey: wallet.publicKey,
+          toPubkey: vaultPk,
+          lamports,
         })
-      )
-      const {blockhash} = await connection.getLatestBlockhash() ;
-      transaction.recentBlockhash = blockhash ; 
-      transaction.feePayer = new PublicKey(wallet.publicKey)
-
-
-      await wallet.sendTransaction(transaction , connection ) ; 
-
-      setMessage("✅Txn successfull") ; 
-      setLoading(false) ; 
-
-
-    }catch(err){
-      console.error(err) ; 
-      setMessage("❌ Transaction failed. Try again.")
-      setLoading(false) ; 
-      
+      );
+  
+      // Recent blockhash
+      const { blockhash } = await connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = wallet.publicKey;
+  
+      // Send transaction
+      const sig = await wallet.sendTransaction(transaction, connection);
+  
+      setMessage(`✅ Txn successful: ${sig}`);
+    } catch (err: any) {
+      console.error("Transaction error:", err);
+      const lower = err?.message?.toLowerCase?.() || "";
+      if (lower.includes("rejected")) {
+        setMessage("❌ You rejected the transaction.");
+      } else {
+        setMessage("❌ Transaction failed. Check console for details.");
+      }
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+    
 
   return (
 
@@ -259,7 +280,6 @@ function KeyValue({ label, value }: { label: string; value: string }) {
     </div>
   )
 }
-
 
 
 

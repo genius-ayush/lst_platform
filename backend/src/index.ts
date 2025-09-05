@@ -7,7 +7,6 @@ var bs58 = require('bs58')
 import {
   getOrCreateAssociatedTokenAccount,
   mintTo,
-  TOKEN_PROGRAM_ID,
   TOKEN_2022_PROGRAM_ID
 } from "@solana/spl-token";
 
@@ -166,7 +165,7 @@ app.post("/txn", async (req, res) => {
     }else if(unit == '6AmxLvScpqqgCfdQQ92Cc1gLxKbPzeyCsc5sztCp2HGU'){
       //unstack the driftsol to sol ; 
       if(to !== VAULT_ADDRESS + "."){
-        return res.status(400).json({error :"not send to our vault"}) ; 
+        return res.status(400).json({error :`not send to our vault ${to}`}) ; 
       } 
       console.log("after vault address") ; 
 

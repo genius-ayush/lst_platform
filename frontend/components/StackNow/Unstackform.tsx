@@ -7,8 +7,19 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useWallet } from "@solana/wallet-adapter-react"
+import { Connection, PublicKey, Transaction } from "@solana/web3.js"
+import { createTransferCheckedInstruction, createTransferInstruction, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 
+const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL!)
 
+// Hardcoded token configuration (Token-2022)
+const DRIFT_MINT_ADDRESS = "6AmxLvScpqqgCfdQQ92Cc1gLxKbPzeyCsc5sztCp2HGU" // Token-2022 mint
+const DRIFT_DECIMALS = 9
+const TOKEN_PROGRAM = TOKEN_2022_PROGRAM_ID
+
+// TODO: Replace with your destination token account (vault ATA) for the same mint
+// This must be an SPL token account for the above mint under Token-2022
+const DESTINATION_TOKEN_ACCOUNT = "6AmxLvScpqqgCfdQQ92Cc1gLxKbPzeyCsc5sztCp2HGU" // e.g. "8...yourVaultATA..." 
 
 
 type Token = "SOL" | "driftSOL"
@@ -18,11 +29,118 @@ export function Unstackform() {
   const [fromToken, setFromToken] = React.useState<Token>("driftSOL")
   const [amount, setAmount] = React.useState<string>("")
   const [method, setMethod] = React.useState<"direct" | "jupiter">("direct")
-
+  const [message , setMessage] = React.useState("") ; 
+  const [loading , setLoading] = React.useState(false) ; 
+  const wallet = useWallet() ; 
   // Simple mock conversion rate and fee to show interactivity
   const parsed = Number.parseFloat(amount || "0") || 0
   const rate = 1.2 // pretend mint fee or redemption
   const receive = parsed * rate
+
+  const unstack_sol = async () => {
+    if (!wallet.publicKey) {
+      setMessage("Connect your wallet to continue.");
+      return;
+    }
+  
+    // Parse amount input
+    const uiAmount = Number.parseFloat(amount || "0");
+    if (!Number.isFinite(uiAmount) || uiAmount <= 0) {
+      setMessage("Enter a valid amount greater than 0.");
+      return;
+    }
+  
+    let driftMintPk: PublicKey;
+    let vaultAtaPk: PublicKey;
+  
+    try {
+      driftMintPk = new PublicKey(DRIFT_MINT_ADDRESS);
+  
+      // 🚀 FIX: derive the vault’s ATA instead of hardcoding the mint address
+      const vaultAuthority = new PublicKey(process.env.NEXT_PUBLIC_VAULT_ADDRESS!); // your backend-controlled wallet
+      vaultAtaPk = await getAssociatedTokenAddress(
+        driftMintPk,
+        vaultAuthority,
+        true,
+        TOKEN_2022_PROGRAM_ID
+      );
+
+      console.log(vaultAtaPk.toBase58());
+    } catch (e) {
+      console.error(e);
+      setMessage("Config error: Invalid mint or vault authority public key.");
+      return;
+    }
+  
+    try {
+      setLoading(true);
+      setMessage("Processing transaction...");
+  
+      // Derive the user’s ATA for driftSOL
+      const userDriftAta = await getAssociatedTokenAddress(
+        driftMintPk,
+        wallet.publicKey,
+        true,
+        TOKEN_PROGRAM
+      );
+      
+      // Pre-check user balance
+      try {
+        const bal = await connection.getTokenAccountBalance(userDriftAta, "confirmed");
+        const available = BigInt(bal.value.amount);
+        const toSend = BigInt(Math.round(uiAmount * 10 ** DRIFT_DECIMALS));
+        if (available < toSend) {
+          setMessage("Insufficient driftSOL balance.");
+          setLoading(false);
+          return;
+        }
+      } catch {
+        // If account missing, transaction will fail later
+      }
+  
+      // Convert to base units
+      const amountInBaseUnits = BigInt(Math.round(uiAmount * 10 ** DRIFT_DECIMALS));
+  
+      // Build transaction
+      const transaction = new Transaction().add(
+        createTransferCheckedInstruction(
+          userDriftAta,
+          driftMintPk,         // not vault ATA!
+          vaultAtaPk,
+          wallet.publicKey,
+          amountInBaseUnits,
+          DRIFT_DECIMALS,
+          [],
+          TOKEN_2022_PROGRAM_ID
+        )
+        
+      );
+  
+      // Recent blockhash
+      const { blockhash } = await connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = wallet.publicKey;
+  
+      // Send transaction
+      const sig = await wallet.sendTransaction(transaction, connection);
+      setMessage(`✅ Txn successful: ${sig}`);
+    } catch (err: any) {
+      console.error(err);
+      const lower = err?.message?.toLowerCase?.() || "";
+      if (lower.includes("rejected")) {
+        setMessage("You rejected the transaction request.");
+      } else if (lower.includes("owner") || lower.includes("mint")) {
+        setMessage("Token account mismatch. Ensure vault ATA matches driftSOL mint & Token-2022.");
+      } else if (lower.includes("not initialized")) {
+        setMessage("Vault ATA not initialized. Create the ATA for your vault first.");
+      } else {
+        setMessage("❌ Transaction failed. Check console for details.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   return (
     <div className="flex flex-col">
@@ -102,11 +220,16 @@ export function Unstackform() {
       />
     </div>
 
-    {connected ?  (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95">
-      Unstack SOL
-    </Button>) : (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95">
-      Connect Wallet
-    </Button>)}
+    {connected ? (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95" onClick={unstack_sol}>
+
+{loading ? "Processing..." : "Convert to driftSol"}
+</Button>) : (<Button className="w-full h-12 rounded-full text-base font-semibold bg-primary text-primary-foreground hover:opacity-95">
+Connect Wallet
+</Button>)}
+
+{message && (
+<p className="text-sm mt-2 text-gray-700 dark:text-gray-300">{message}</p>
+)}
 
     {/* Fine Controls */}
     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

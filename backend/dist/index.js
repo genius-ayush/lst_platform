@@ -120,7 +120,7 @@ app.post("/txn", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         else if (unit == '6AmxLvScpqqgCfdQQ92Cc1gLxKbPzeyCsc5sztCp2HGU') {
             //unstack the driftsol to sol ; 
             if (to !== VAULT_ADDRESS + ".") {
-                return res.status(400).json({ error: "not send to our vault" });
+                return res.status(400).json({ error: `not send to our vault ${to}` });
             }
             console.log("after vault address");
             const sendAmount = amount * 1.25;
